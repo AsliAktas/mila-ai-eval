@@ -24,6 +24,11 @@ E-ticaret müşteri destek sohbetlerini **anlam temelli** (semantic) etiketleyen
 - 🧾 **Raporlar** → 5 PDF (Doğruluk Özeti, SWOT, Geliştirme Önerileri, Müşteri Talepleri Özeti, Teknik Notlar)
 - 📦 **Teslim** → `deliverables/` klasörünü tek komutla **zip**
 - 🇹🇷 **Türkçe glif** → ReportLab + Windows’ta **Arial** fallback
+
+📊 Özet Skorlar (Gold vs LLM)
+
+Veri seti: 40 sohbet · Model: gpt-5-nano
+Ölçüm: sohbet-bazlı Accuracy & Macro-F1
 <p>
   <img src="https://img.shields.io/badge/Sentiment_Acc-77.5%25-4c9aff" />
   <img src="https://img.shields.io/badge/Intent_Acc-77.5%25-4c9aff" />
@@ -31,12 +36,6 @@ E-ticaret müşteri destek sohbetlerini **anlam temelli** (semantic) etiketleyen
   <img src="https://img.shields.io/badge/T%C3%BCr_Acc-37.5%25-f59f00" />
   <img src="https://img.shields.io/badge/Triple_Correct-42.5%25-00b341" />
 </p>
-
-📊 Özet Skorlar (Gold vs LLM)
-
-Veri seti: 40 sohbet · Model: gpt-5-nano
-Ölçüm: sohbet-bazlı Accuracy & Macro-F1
-
 | Alan             | Accuracy (%) | Macro-F1 (%) |
 | ---------------- | :----------: | :----------: |
 | **Sentiment**    |     77.50    |     73.68    |
