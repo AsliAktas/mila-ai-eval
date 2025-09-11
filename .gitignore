@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Sanal ortam
+.venv/
+venv/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Gizli dosyalar
+.env
+.env.*
+
+# Çıktılar / veriler
+outputs/
+deliverables/
+*.xlsx
+*.csv
+*.pdf
+*.zip
+
+# Ara/veri
+data/raw/*.json
+data/raw/*.jsonl
+assets/fonts/*.ttf
