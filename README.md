@@ -37,11 +37,13 @@ E-ticaret müşteri destek sohbetlerini **anlam temelli** (semantic) etiketleyen
 Veri seti: 40 sohbet · Model: gpt-5-nano
 Ölçüm: sohbet-bazlı Accuracy & Macro-F1
 
-Alan	Accuracy (%)	Macro-F1 (%)
-Sentiment	77.50	73.68
-Intent	77.50	63.51
-Yanıt durumu	75.00	74.42
-Tür	37.50	32.19
+| Alan             | Accuracy (%) | Macro-F1 (%) |
+| ---------------- | :----------: | :----------: |
+| **Sentiment**    |     77.50    |     73.68    |
+| **Intent**       |     77.50    |     63.51    |
+| **Yanıt durumu** |     75.00    |     74.42    |
+| **Tür**          |     37.50    |     32.19    |
+
 
 Üçü birden doğru: 42.50%
 
