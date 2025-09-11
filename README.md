@@ -254,6 +254,4 @@ Akış:
 ---
 
 ## 🤝 Katkı
-
-Issue ve PR’lara açığız.  
 **Hazırlayan:** Aslı Aktaş — iyileştirme önerilerinizi bekliyoruz! ✨
