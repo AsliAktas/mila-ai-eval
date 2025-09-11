@@ -36,6 +36,7 @@ Veri seti: 40 sohbet · Model: gpt-5-nano
   <img src="https://img.shields.io/badge/T%C3%BCr_Acc-37.5%25-f59f00" />
   <img src="https://img.shields.io/badge/Triple_Correct-42.5%25-00b341" />
 </p>
+
 | Alan             | Accuracy (%) | Macro-F1 (%) |
 | ---------------- | :----------: | :----------: |
 | **Sentiment**    |     77.50    |     73.68    |
