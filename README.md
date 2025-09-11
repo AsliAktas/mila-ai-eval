@@ -24,7 +24,29 @@ E-ticaret müşteri destek sohbetlerini **anlam temelli** (semantic) etiketleyen
 - 🧾 **Raporlar** → 5 PDF (Doğruluk Özeti, SWOT, Geliştirme Önerileri, Müşteri Talepleri Özeti, Teknik Notlar)
 - 📦 **Teslim** → `deliverables/` klasörünü tek komutla **zip**
 - 🇹🇷 **Türkçe glif** → ReportLab + Windows’ta **Arial** fallback
+<p>
+  <img src="https://img.shields.io/badge/Sentiment_Acc-77.5%25-4c9aff" />
+  <img src="https://img.shields.io/badge/Intent_Acc-77.5%25-4c9aff" />
+  <img src="https://img.shields.io/badge/Yan%C4%B1t_Durumu_Acc-75.0%25-4c9aff" />
+  <img src="https://img.shields.io/badge/T%C3%BCr_Acc-37.5%25-f59f00" />
+  <img src="https://img.shields.io/badge/Triple_Correct-42.5%25-00b341" />
+</p>
 
+📊 Özet Skorlar (Gold vs LLM)
+
+Veri seti: 40 sohbet · Model: gpt-5-nano
+Ölçüm: sohbet-bazlı Accuracy & Macro-F1
+
+Alan	Accuracy (%)	Macro-F1 (%)
+Sentiment	77.50	73.68
+Intent	77.50	63.51
+Yanıt durumu	75.00	74.42
+Tür	37.50	32.19
+
+Üçü birden doğru: 42.50%
+
+Not: “Üçü birden doğru” tüm alanların aynı sohbette doğru olmasıdır; Macro-F1 bu metrik için hesaplanmaz.
+<sub>Son güncelleme: 11.09.2025 · Değerlendirme modu: sohbet-bazlı</sub>
 ---
 
 ## 🧭 İçindekiler
