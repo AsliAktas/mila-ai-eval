@@ -48,6 +48,7 @@ Veri seti: 40 sohbet · Model: gpt-5-nano
 Üçü birden doğru: 42.50%
 
 Not: “Üçü birden doğru” tüm alanların aynı sohbette doğru olmasıdır; Macro-F1 bu metrik için hesaplanmaz.
+
 <sub>Son güncelleme: 11.09.2025 · Değerlendirme modu: sohbet-bazlı</sub>
 ---
 
