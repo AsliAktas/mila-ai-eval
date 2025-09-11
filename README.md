@@ -73,9 +73,6 @@ mila-ai-eval/
 ├─ .gitignore
 └─ README.md
 
-yaml
-Kodu kopyala
-
 > `.gitignore` içinde `.env`, `.venv/`, `outputs/`, `deliverables/`, büyük dosyalar & fontlar saklanır.
 
 ---
@@ -90,24 +87,19 @@ python -m venv .venv
 # source .venv/bin/activate
 
 pip install -r requirements.txt
-Ana bağımlılıklar: openai, pydantic, python-dotenv, pandas, numpy, scikit-learn, reportlab, xlsxwriter, openpyxl
-Font notu: Windows’ta Arial otomatik kullanılır. DejaVu Sans için assets/fonts/DejaVuSans.ttf + DejaVuSans-Bold.ttf ekleyebilirsin.
-
 🔐 .env ve Yapılandırma
+
 Kök dizine .env (repo’ya ekleme):
 
-makefile
-Kodu kopyala
 OPENAI_API_KEY=sk-...         # zorunlu
 OPENAI_BASE_URL=              # opsiyonel (proxy/self-host)
 OPENAI_MODEL=gpt-5-nano       # opsiyonel; CLI ile de geçirilebilir
 ⏱️ Hızlı Başlangıç
+
 1) Değerlendirme (LLM tahmin + Excel + confusion)
 
 Windows (CMD):
 
-bat
-Kodu kopyala
 python src\eval_pipeline.py ^
   --in-json data\raw\20-sohbet-trendyol-mila.json ^
   --prompt src\prompt_template.txt ^
@@ -115,20 +107,20 @@ python src\eval_pipeline.py ^
   --excel-out outputs\eval\mila_eval.xlsx ^
   --cm-dir outputs\eval\confusions ^
   --model gpt-5-nano
+
+
 macOS/Linux/PowerShell:
 
-bash
-Kodu kopyala
 python src/eval_pipeline.py --in-json data/raw/20-sohbet-trendyol-mila.json \
   --prompt src/prompt_template.txt \
   --pred-out outputs/predictions/preds_mila.csv \
   --excel-out outputs/eval/mila_eval.xlsx \
   --cm-dir outputs/eval/confusions \
   --model gpt-5-nano
+
+
 2) PDF Raporları Üret
 
-bash
-Kodu kopyala
 python src/generate_reports.py \
   --xlsx outputs/eval/mila_eval.xlsx \
   --preds outputs/predictions/preds_mila.csv \
@@ -136,12 +128,14 @@ python src/generate_reports.py \
   --project "Trendyol Mila Sohbet Botu" \
   --model gpt-5-nano \
   --prepared_by "Aslı Aktaş"
+
+
 3) Teslim Paketini Zip’le
 
-bash
-Kodu kopyala
 python src/package_deliverables.py --dir deliverables --out mila-deliverables
+
 🧵 Girdi Formatı
+
 JSON/JSONL desteklenir. Önerilen alanlar:
 
 conversation_id (yoksa indeks kullanılır)
@@ -155,8 +149,6 @@ Zaman alanları (opsiyonel): sohbet_baslangic, sohbet_bitis (veya start_ts, end_
 
 Örnek alternatif şema:
 
-json
-Kodu kopyala
 {
   "conversation_id": "abc-123",
   "messages": [
@@ -164,7 +156,9 @@ Kodu kopyala
     {"role": "assistant", "text": "Takip linki ..."}
   ]
 }
+
 📤 Üretilen Çıktılar
+
 outputs/predictions/preds_mila.csv — tek satır etiket + prompt & raw JSON
 
 outputs/eval/mila_eval.xlsx — data (gold+pred+zaman) & metrics
@@ -178,6 +172,7 @@ deliverables/ — 5 PDF:
 mila-deliverables.zip — teslim paketi
 
 🧾 Raporlar
+
 01 Doğruluk Özeti → Accuracy & Macro-F1 + “Üçü birden doğru”, kısa içgörüler
 
 02 SWOT → Güçlü/Zayıf/Fırsat/Tehdit
@@ -189,6 +184,7 @@ mila-deliverables.zip — teslim paketi
 05 Teknik Notlar → Komutlar, klasör yapısı, kalite güvencesi
 
 📈 EDA (Opsiyonel)
+
 Notebooks klasöründe hızlı EDA defteri:
 
 Dağılım kıyası: Sentiment / Yanıt durumu / Tür / Intent (Top-10)
@@ -198,6 +194,7 @@ Intent Confusion (Top-10) ısı haritası
 Özet skorlar: Accuracy & Macro-F1 bar grafiği
 
 🧠 Model ve Structured Output
+
 Varsayılan: gpt-5-nano (temperature yok)
 
 Alternatif: gpt-4o-mini, gpt-4.1-mini
@@ -213,6 +210,7 @@ Pydantic doğrulaması (kapalı kümeler)
 Boş/uygunsuz yanıt → fail-fast (koşu durur)
 
 🧰 Troubleshooting
+
 PDF’de Türkçe karakter bozuk → Windows’ta Arial fallback; DejaVu için font dosyalarını assets/fonts/ altına ekle.
 
 reportlab bulunamadı → pip install reportlab
@@ -223,6 +221,7 @@ git remote set-url origin https://github.com/<user>/mila-ai-eval.git && git push
 Boş/parse edilemeyen LLM yanıtı → .env ve model adını kontrol et; structured parse bilerek koşuyu durdurur.
 
 🛡️ Lisans ve Güvenlik
+
 Lisans: MIT (önerilir).
 
 Kişisel veri içeren sohbetler anonimleştirilmelidir (KVKK/GDPR).
