@@ -1,68 +1,150 @@
-# ACME Müşteri Memnuniyeti Analiz Aracı
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=rect&color=0:7F00FF,100:E100FF&height=120&section=header&text=Grispi%20AI%20Analysis%20Prototype&fontSize=48&fontColor=ffffff&fontAlignY=40" alt="Grispi AI Analysis Prototype Banner">
+</p>
 
-    ## 1. Proje Hakkında
-    Bu proje, e-ticaret müşteri hizmetleri sohbetlerini yapay zeka kullanarak otomatik olarak sınıflandırmak ve analiz etmek için tasarlanmış bir araçtır. Geliştirilen model, müşteri niyetini, duygusunu ve sorun türünü anlamaya odaklanır. Projenin temel amacı, büyük hacimli müşteri sohbetlerini anlamlandırarak operasyonel verimliliği artırmak ve müşteri memnuniyetini yükseltmektir.
+<p align="center">
+  <a href="#"><img src="https://readme-typing-svg.demolab.com?font=Inter&size=24&pause=800&color=FFFFFF&center=true&vCenter=true&repeat=false&width=980&lines=Trendyol+Mila+Chatbot+%C3%BCzerine+bir+Vaka+Analizi" alt="typing banner"></a>
+</p>
 
-    ## 2. Kullanılan Kaynaklar
-    Bu projede, veri analizi ve model geliştirme süreçlerinde çeşitli kaynaklar kullanılmıştır:
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" alt="python">
+  <img src="https://img.shields.io/badge/Ollama-Local%20LLM-000000?logo=ollama&logoColor=white" alt="ollama">
+  <img src="https://img.shields.io/badge/Cohere-Command%E2%80%91R-4A33B4" alt="cohere">
+  <img src="https://img.shields.io/badge/Pandas-Data%20Analysis-150458?logo=pandas&logoColor=white" alt="pandas">
+  <img src="https://img.shields.io/badge/Matplotlib_&_Seaborn-Reports-11557c?logo=matplotlib" alt="matplotlib">
+  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="license">
+</p>
 
-    * **Sohbet Verileri**: `trendyol_mila.xlsx` dosyası, manuel olarak etiketlenmiş müşteri hizmetleri sohbetlerini içerir ve modelin eğitimi ile doğruluğunun değerlendirilmesi için ground truth verisi olarak kullanılmıştır.
-    * **Model ve API**: E-ticaret sohbetlerinin sınıflandırılması için, **Groq**'un düşük gecikmeli **Llama 3** ailesi modelleri kullanılmıştır.
-    * **Analiz Raporu**: `ACME MMA.pdf` raporu, projenin başlangıç noktası ve problem tanımı için temel bir kaynak görevi görmüştür. Raporda, "Teslimat sorunları", "İade/değişim süreçleri" ve "Sistem/teknoloji sorunları" gibi ana kök nedenler belirlenmiştir.
+# 🧠 Grispi AI Müşteri Hizmetleri Analiz Aracı: Prototip Sunumu
 
-    ## 3. Çalışma Şekli
-    Proje, **anlam öncelikli sınıflandırma** yaklaşımını benimser. Anahtar kelimelerden ziyade, sohbetin bütününde yer alan bağlam ve gerçek niyet dikkate alınır.
+Bu proje, Grispi'nin yapay zekâ destekli müşteri hizmetleri analiz aracının ilk, çalışan prototipini sunmaktadır. Proje kapsamında, Trendyol Mila Chatbot'u ile yapılan 20 adet müşteri sohbeti, `Ollama` üzerinde lokal olarak çalıştırılan `Command-R` modeli kullanılarak analiz edilmiş ve sonuçlar görsel raporlara dönüştürülmüştür.
 
-    ### Sınıflandırma Alanları
-    Model, her bir sohbeti beş farklı kategoriye göre etiketler:
-    * `yanit_durumu` (Çözüldü/Çözülemedi)
-    * `sentiment` (Pozitif/Negatif/Nötr)
-    * `tur` (Şikayet, Sorun, Bilgi alma, İstek, Soru, İade)
-    * `intent` (Asıl amaç, ör: Kargo, Ödeme vb.)
-    * `intent_detay` (Daha spesifik durum)
+- ✅ **Akıllı Yönlendirme & Hata Düzeltme** → Yapay zekâya ne yapacağını, nasıl düşüneceğini ve nasıl karar vereceğini öğreten hibrit bir prompt mühendisliği yaklaşımı.
+- 📊 **Kapsamlı Dashboard Raporları** → Her kategori için model performansını, etiket dağılımını ve hata analizini birleştiren PNG formatında görsel raporlar.
+- 🧾 **Karşılaştırmalı Excel Analizi** → Manuel ve LLM etiketlerini yan yana gösteren, eşleşme durumuna göre otomatik renklendirilmiş, detaylı `.xlsx` raporu.
+- 🚀 **Lokal ve Açık Kaynak** → Pahalı API'ler yerine, `Ollama` aracılığıyla lokalde çalıştırılan `Command-R` modeli ile esneklik ve maliyet avantajı.
 
-    ### Tahmin ve Değerlendirme
-    Model, her bir sohbet için tek bir satır JSON çıktısı üretir. Bu çıktılar, `calculate_accuracy.py` betiği ile ground truth verisiyle karşılaştırılarak her bir kategorinin doğruluğu hesaplanır.
+📊 **Özet Skorlar (Manuel Etiketler vs LLM Tahminleri)**
 
-    ## 4. Performans ve Doğruluk
-    Projenin ilk denemesinde elde edilen doğruluk oranları aşağıdadır. Bu veriler, modelin güçlü ve zayıf yönlerini göstermektedir.
+Veri seti: 40 sohbet · Model: `Command-R` (via Ollama)
+Ölçüm: Kategori bazlı doğruluk (Accuracy) - *`tur` kategorisi birleştirilmiş etiketlere göre ölçülmüştür.*
 
-    | Kategori | Model Tahmin Doğruluğu (%) |
-    | :--- | :---: |
-    | Yanıt Durumu | %100.00 |
-    | Sentiment | %67.50 |
-    | Tür | %55.00 |
-    | Intent | %52.50 |
-    | Intent Detay | %7.50 |
-    | **Genel (Tam Eşleşme)** | **%5.00** |
+<p>
+  <img src="https://img.shields.io/badge/Yanıt_Durumu-95.0%25-22c55e" alt="Yanıt Durumu Accuracy">
+  <img src="https://img.shields.io/badge/Intent-92.5%25-22c55e" alt="Intent Accuracy">
+  <img src="https://img.shields.io/badge/Tur-85.0%25-3b82f6" alt="Tur Accuracy">
+  <img src="https://img.shields.io/badge/Intent_Detay-77.5%25-8b5cf6" alt="Intent Detay Accuracy">
+  <img src="https://img.shields.io/badge/Sentiment-67.5%25-f97316" alt="Sentiment Accuracy">
+</p>
 
-    ### Analiz
-    * **Güçlü Yönler:** Model, bir sorunun çözülüp çözülmediğini belirlemede mükemmeldir.
-    * **Zayıf Yönler:** `Tür`, `Intent` ve `Intent Detay` gibi konuşmanın içeriğine dayalı etiketlemelerde ciddi zorluklar yaşanmaktadır. Özellikle `Intent Detay` doğruluğunun çok düşük olması, modelin ince ayrıntıları yakalamakta başarısız olduğunu gösterir.
+| Kategori | Doğruluk (%) |
+| :--- | :---: |
+| **Yanıt Durumu** | 95.00 |
+| **Intent** | 92.50 |
+| **Tur (Problem/Sorgu)** | 85.00 |
+| **Intent Detay** | 77.50 |
+| **Sentiment** | 67.50 |
 
-    ## 5. Gelecek İyileştirmeler
-    Elde edilen sonuçlara dayanarak, projenin genel doğruluğunu artırmak için aşağıdaki adımlar planlanmaktadır:
+<sub>Son güncelleme: 2 Ekim 2025 · Analiz Aracı: Google Colab Notebooks</sub>
+---
 
-    * **Prompt Optimizasyonu**: `Tür` ve `Intent` kategorileri arasındaki nüansları daha iyi açıklayan yeni, daha detaylı örnekler içeren bir prompt şablonu oluşturulacaktır.
-    * **Daha Fazla Örnek Veri**: Modelin zorlandığı senaryolar için ek etiketli veri sağlanarak modelin öğrenme yeteneği artırılacaktır.
-    * **Model Seçimi**: Daha karmaşık ve nüans gerektiren görevler için **Llama 3** gibi daha güçlü modellerin kullanılması düşünülmektedir.
+## 🧭 İçindekiler
 
-    ---
+- [Projenin Amacı](#-projenin-amacı)
+- [Metodoloji ve İş Akışı](#-metodoloji-ve-i̇ş-akışı)
+- [Proje Bileşenleri](#️-proje-bileşenleri)
+- [Nasıl Çalıştırılır?](#-nasıl-çalıştırılır)
+- [Üretilen Çıktılar](#-üretilen-çıktılar)
+- [Lisans](#️-lisans)
+- [Katkı](#-katkı)
 
-    ### Nasıl Çalıştırılır?
+---
 
-    Projeyi yerel makinenizde çalıştırmak için terminalde aşağıdaki komutları kullanabilirsiniz:
+## 🎯 Projenin Amacı
 
-    ```bash
-    # Gerekli Python kütüphanelerini yükleyin
-    pip install -r requirements.txt
+Bu projenin temel amacı, Grispi'nin yapay zekâ destekli müşteri hizmetleri analiz aracının ilk, çalışan prototipini geliştirmektir. Bu kapsamda, sağlanan sohbet kayıtları Yapay Zeka (AI) kullanılarak analiz edilmiş, otomatik etiketleme yapılmış, sonuçların doğruluğu ölçülmüş ve eyleme geçirilebilir raporlar ile içgörüler üretilmiştir.
 
-    # .env dosyasında Groq API anahtarınızı tanımlayın
-    # GROQ_API_KEY="...apikey..."
+---
 
-    # LLM tahminlerini çalıştırın
-    python src/llm_infer.py --in-xlsx "outputs/trendyol_mila_updated.xlsx" --sheet-name "sohbetler_GUNCEL" --out "outputs/preds_mila_turfix.csv" --model "llama-3.1-70b-versatile"
+## 🌊 Metodoloji ve İş Akışı
 
-    # Doğruluk hesaplamasını yapın
-    python src/calculate_accuracy.py
-    
+Analiz sürecimiz dört temel adımdan oluşmaktadır:
+
+1.  **Veri Kaynağı:** `20-sohbet-trendyol-mila.json` dosyasından 20 adet sohbet kaydı ham veri olarak kullanılmıştır.
+2.  **AI Analizi:** Her bir sohbet, `Ollama` üzerinde çalışan `Command-R` Büyük Dil Modeli ile bütünsel bir yaklaşımla analiz edilerek 5 ana kategoride etiketlenmiştir.
+3.  **Doğruluk Ölçümü:** Modelin ürettiği tahminler (`llm_final.csv`), referans kabul edilen manuel etiketler (`ground_truth.xlsx`) ile her kategori için karşılaştırılarak doğruluk yüzdeleri hesaplanmıştır.
+4.  **Raporlama:** Elde edilen verilerle, model performansını ve müşteri eğilimlerini gösteren kapsamlı görsel raporlar (Dashboard'lar, SWOT, Excel) oluşturulmuştur.
+
+---
+
+## ⚙️ Proje Bileşenleri
+
+Bu proje, her biri belirli bir görevi yerine getiren bir dizi araçtan (Google Colab Notebook) oluşur:
+
+### 1. AI Etiketleme Motoru
+- **Açıklama:** Ham sohbet verilerini alır, `Ollama` ve `Command-R` kullanarak her bir sohbeti etiketler. Projenin ana "beynidir".
+- **Çıktı:** Tüm sohbetler için hem ham hem de birleştirilmiş etiketleri içeren `llm_final.csv` dosyası.
+
+### 2. Performans Dashboard Üretici
+- **Açıklama:** Analiz sonuçlarını kullanarak, her bir kategori için modelin performansını detaylıca gösteren kapsamlı görsel raporlar (dashboard) üretir.
+- **Çıktı:** 5 adet kategori bazlı `.png` dashboard ve 1 adet genel özet `.png` radar grafiği.
+
+<details>
+<summary><b>📊 Görsel Rapor Galerisi (Genişletmek için tıklayın)</b></summary>
+<p align="center">
+  <em>Genel Performans Özeti (Radar Grafiği)</em><br>
+  <img src="assets/genel_dogruluk_orani.png" width="600">
+  <br><br>
+  <em>Yanıt Durumu Kategorisi Raporu</em><br>
+  <img src="assets/yanit_durumu.png" width="800">
+  <br><br>
+  <em>Intent Kategorisi Raporu</em><br>
+  <img src="assets/intent.png" width="800">
+  <br><br>
+  <em>Intent Detay Kategorisi Raporu</em><br>
+  <img src="assets/intent_detay.png" width="800">
+    <br><br>
+  <em>Sentiment Kategorisi Raporu</em><br>
+  <img src="assets/sentiment.png" width="800">
+  <br><br>
+  <em>Tur Kategorisi Raporu</em><br>
+  <img src="assets/tur.png" width="800">
+</p>
+</details>
+
+### 3. Karşılaştırmalı Excel Raporu Üretici
+- **Açıklama:** Manuel etiketler ile LLM tahminlerini her bir sohbet için yan yana getirir. Tahminlerin doğru (yeşil) veya yanlış (kırmızı) olduğunu görsel olarak işaretler ve sohbetin tam metnini içerir.
+- **Çıktı:** `Karsilastirmali_Analiz_Raporu_Nihai.xlsx` dosyası.
+
+---
+
+## 🚀 Nasıl Çalıştırılır?
+
+Proje, her biri belirli bir görevi yerine getiren bir dizi Google Colab notebook'undan oluşur. Her bir notebook'un başında, hangi dosyaları yüklemeniz gerektiği ve nasıl çalıştırılacağı açıklanmaktadır.
+
+1.  Çalıştırmak istediğiniz araca ait `.ipynb` dosyasını Google Colab ile açın.
+2.  Notebook'un başındaki talimatlara göre gerekli kaynak dosyaları (örn: `ground_truth.xlsx`, `llm_final.csv`) yükleyin.
+3.  Hücreleri yukarıdan aşağıya doğru sırayla çalıştırın.
+4.  Analiz tamamlandığında, üretilen rapor dosyası (örn: `.png`, `.xlsx`) otomatik olarak indirilecektir.
+
+---
+
+## 📤 Üretilen Çıktılar
+
+Bu araç setini kullanarak aşağıdaki raporları ve analiz dosyalarını üretebilirsiniz:
+- `llm_final.csv` (AI Etiketleme Sonuçları)
+- `assets/` klasöründeki `.png` dosyaları (Görsel Performans Raporları)
+- `Karsilastirmali_Analiz_Raporu_Nihai.xlsx` (Renklendirilmiş Excel Raporu)
+- `Trendyol Mila Sohbet Botu AI Analiz Ödevi.pptx` (Proje Sunumu)
+  - *Not: Detaylı SWOT analizi ve geliştirme önerileri bu sunum dosyasının içinde yer almaktadır.*
+
+---
+
+## 🛡️ Lisans
+
+Bu proje **MIT Lisansı** ile lisanslanmıştır.
+
+---
+
+## 🤝 Katkı
+**Hazırlayan:** Aslı Aktaş — iyileştirme önerilerinizi bekliyoruz! ✨
