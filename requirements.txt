@@ -1,0 +1,19 @@
+# Veri işleme ve analizi için
+pandas
+numpy
+
+# Excel dosyalarını okuma/yazma için
+openpyxl
+
+# Lokal LLM çalıştırma ve yönetimi için
+ollama
+
+# AI çıktısını doğrulama (structured output) için
+pydantic
+
+# Görselleştirme ve dashboard oluşturma için
+matplotlib
+seaborn
+
+# İşlem ilerlemesini gösteren bar'lar için
+tqdm
