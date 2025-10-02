@@ -29,3 +29,15 @@ deliverables/
 data/raw/*.json
 data/raw/*.jsonl
 assets/fonts/*.ttf
+
+# Visual Studio klasörünü yoksay
+.vs/
+
+# Tools klasörünü yoksay
+tools/
+
+# Takip edilmeyecek dosyalar
+mila-ai-eval.ipynb
+Karsilastirmali_Analiz_Raporu_Nihai.xlsx
+
+src/
