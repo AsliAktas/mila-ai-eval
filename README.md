@@ -29,21 +29,14 @@ Bu proje, Grispi'nin yapay zekâ destekli müşteri hizmetleri analiz aracının
 Veri seti: 40 sohbet · Model: `Command-R` (via Ollama)
 Ölçüm: Kategori bazlı doğruluk (Accuracy) - *`tur` kategorisi birleştirilmiş etiketlere göre ölçülmüştür.*
 
-<p>
-  <img src="https://img.shields.io/badge/Yanıt_Durumu-95.0%25-22c55e" alt="Yanıt Durumu Accuracy">
-  <img src="https://img.shields.io/badge/Intent-92.5%25-22c55e" alt="Intent Accuracy">
-  <img src="https://img.shields.io/badge/Tur-85.0%25-3b82f6" alt="Tur Accuracy">
-  <img src="https://img.shields.io/badge/Intent_Detay-77.5%25-8b5cf6" alt="Intent Detay Accuracy">
-  <img src="https://img.shields.io/badge/Sentiment-67.5%25-f97316" alt="Sentiment Accuracy">
-</p>
 
 | Kategori | Doğruluk (%) |
 | :--- | :---: |
 | **Yanıt Durumu** | 95.00 |
-| **Intent** | 92.50 |
+| **Intent** | 82.50 |
 | **Tur (Problem/Sorgu)** | 85.00 |
-| **Intent Detay** | 77.50 |
-| **Sentiment** | 67.50 |
+| **Intent Detay** | 72.50 |
+| **Sentiment** | 92.50 |
 
 <sub>Son güncelleme: 2 Ekim 2025 · Analiz Aracı: Google Colab Notebooks</sub>
 ---
@@ -72,7 +65,7 @@ Analiz sürecimiz dört temel adımdan oluşmaktadır:
 
 1.  **Veri Kaynağı:** `20-sohbet-trendyol-mila.json` dosyasından 20 adet sohbet kaydı ham veri olarak kullanılmıştır.
 2.  **AI Analizi:** Her bir sohbet, `Ollama` üzerinde çalışan `Command-R` Büyük Dil Modeli ile bütünsel bir yaklaşımla analiz edilerek 5 ana kategoride etiketlenmiştir.
-3.  **Doğruluk Ölçümü:** Modelin ürettiği tahminler (`llm_final.csv`), referans kabul edilen manuel etiketler (`ground_truth.xlsx`) ile her kategori için karşılaştırılarak doğruluk yüzdeleri hesaplanmıştır.
+3.  **Doğruluk Ölçümü:** Modelin ürettiği tahminler (`llm.csv`), referans kabul edilen manuel etiketler (`ground_truth.xlsx`) ile her kategori için karşılaştırılarak doğruluk yüzdeleri hesaplanmıştır.
 4.  **Raporlama:** Elde edilen verilerle, model performansını ve müşteri eğilimlerini gösteren kapsamlı görsel raporlar (Dashboard'lar, SWOT, Excel) oluşturulmuştur.
 
 ---
@@ -83,7 +76,7 @@ Bu proje, her biri belirli bir görevi yerine getiren bir dizi araçtan (Google 
 
 ### 1. AI Etiketleme Motoru
 - **Açıklama:** Ham sohbet verilerini alır, `Ollama` ve `Command-R` kullanarak her bir sohbeti etiketler. Projenin ana "beynidir".
-- **Çıktı:** Tüm sohbetler için hem ham hem de birleştirilmiş etiketleri içeren `llm_final.csv` dosyası.
+- **Çıktı:** Tüm sohbetler için hem ham hem de birleştirilmiş etiketleri içeren `llm.csv` dosyası.
 
 ### 2. Performans Dashboard Üretici
 - **Açıklama:** Analiz sonuçlarını kullanarak, her bir kategori için modelin performansını detaylıca gösteren kapsamlı görsel raporlar (dashboard) üretir.
@@ -93,7 +86,7 @@ Bu proje, her biri belirli bir görevi yerine getiren bir dizi araçtan (Google 
 <summary><b>📊 Görsel Rapor Galerisi (Genişletmek için tıklayın)</b></summary>
 <p align="center">
   <em>Genel Performans Özeti (Radar Grafiği)</em><br>
-  <img src="assets/genel_dogruluk_orani.png" width="600">
+  <img src="assets/genel_dogruluk.png" width="600">
   <br><br>
   <em>Yanıt Durumu Kategorisi Raporu</em><br>
   <img src="assets/yanit_durumu.png" width="800">
@@ -114,7 +107,7 @@ Bu proje, her biri belirli bir görevi yerine getiren bir dizi araçtan (Google 
 
 ### 3. Karşılaştırmalı Excel Raporu Üretici
 - **Açıklama:** Manuel etiketler ile LLM tahminlerini her bir sohbet için yan yana getirir. Tahminlerin doğru (yeşil) veya yanlış (kırmızı) olduğunu görsel olarak işaretler ve sohbetin tam metnini içerir.
-- **Çıktı:** `Karsilastirmali_Analiz_Raporu_Nihai.xlsx` dosyası.
+- **Çıktı:** `Karsilastirmali_Analiz_Raporu.xlsx` dosyası.
 
 ---
 
@@ -123,7 +116,7 @@ Bu proje, her biri belirli bir görevi yerine getiren bir dizi araçtan (Google 
 Proje, her biri belirli bir görevi yerine getiren bir dizi Google Colab notebook'undan oluşur. Her bir notebook'un başında, hangi dosyaları yüklemeniz gerektiği ve nasıl çalıştırılacağı açıklanmaktadır.
 
 1.  Çalıştırmak istediğiniz araca ait `.ipynb` dosyasını Google Colab ile açın.
-2.  Notebook'un başındaki talimatlara göre gerekli kaynak dosyaları (örn: `ground_truth.xlsx`, `llm_final.csv`) yükleyin.
+2.  Notebook'un başındaki talimatlara göre gerekli kaynak dosyaları (örn: `ground_truth.xlsx`, `llm.csv`) yükleyin.
 3.  Hücreleri yukarıdan aşağıya doğru sırayla çalıştırın.
 4.  Analiz tamamlandığında, üretilen rapor dosyası (örn: `.png`, `.xlsx`) otomatik olarak indirilecektir.
 
@@ -132,9 +125,9 @@ Proje, her biri belirli bir görevi yerine getiren bir dizi Google Colab noteboo
 ## 📤 Üretilen Çıktılar
 
 Bu araç setini kullanarak aşağıdaki raporları ve analiz dosyalarını üretebilirsiniz:
-- `llm_final.csv` (AI Etiketleme Sonuçları)
+- `llm.csv` (AI Etiketleme Sonuçları)
 - `assets/` klasöründeki `.png` dosyaları (Görsel Performans Raporları)
-- `Karsilastirmali_Analiz_Raporu_Nihai.xlsx` (Renklendirilmiş Excel Raporu)
+- `Karsilastirmali_Analiz_Raporu.xlsx` (Renklendirilmiş Excel Raporu)
 - `Trendyol Mila Sohbet Botu AI Analiz Ödevi.pptx` (Proje Sunumu)
   - *Not: Detaylı SWOT analizi ve geliştirme önerileri bu sunum dosyasının içinde yer almaktadır.*
 
