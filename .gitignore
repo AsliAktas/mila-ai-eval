@@ -40,4 +40,22 @@ tools/
 mila-ai-eval.ipynb
 Karsilastirmali_Analiz_Raporu_Nihai.xlsx
 
-src/
+# Geçici Office dosyaları
+~$*.pptx
+~$*.docx
+~$*.xlsx
+
+# Sunum ve grafik çıktıları (geçici)
+*.png
+*.pptx
+
+# Geçici Python dosyaları
+*_temp.py
+*_test.py
+*not_working.py
+*Kopya*.py
+*Kopya*.txt
+
+# Logs
+logs/
+*.log

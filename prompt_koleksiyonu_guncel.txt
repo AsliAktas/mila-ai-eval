@@ -1,0 +1,425 @@
+# ===============================================================
+# MILA AI PROJECT - GÜNCEL PROMPT'LAR VE KONFIGÜRASYONLAR
+# ===============================================================
+# Proje: Trendyol Mila Chatbot AI Analizi
+# Tarih: Ekim 2025
+# Hazırlayan: Aslı Aktaş
+# Açıklama: Bu dosya, projenin güncel verilerini sağlayan tüm 
+#           prompt şablonlarını ve LLM konfigürasyonlarını içerir.
+# ===============================================================
+
+## İÇERİK TABLOSU
+# 1. Ana Prompt Şablonu (prompt_template.txt)
+# 2. Gelişmiş Prompt Şablonu (prompt_template - Kopya.txt)  
+# 3. LLM Konfigürasyonu ve API Ayarları
+# 4. Kategori Tanımları ve Sözlükler
+# 5. Karar Kuralları ve Öncelikler
+# 6. Örnek Kullanım Senaryoları
+# 7. Doğruluk Değerlendirme Kriterleri
+
+# ===============================================================
+# 1. ANA PROMPT ŞABLONU (GÜNCEL VERSİYON)
+# ===============================================================
+
+ANLAM ÖNCELİKLİ SINIFLANDIRMA (sohbetler_GUNCEL için)
+
+ROLÜN:
+- E-ticaret müşteri sohbetlerini yalnızca BAĞLAM ve NİYET'e göre sınıflandır.
+- Anahtar kelime ezberi YOK; her zaman ifadenin GERÇEK ANLAMINI dikkate al.
+- İç muhakemeni yazma; SADECE tek satır SAF JSON üret.
+
+TEK ÇIKIŞ (KAPALI KÜME, SIRALI ANAHTARLAR):
+{"yanit_durumu":"…","sentiment":"…","tur":"…","intent":"…","intent_detay":"…"}
+
+ALAN SÖZLÜKLERİ (sohbetler_GUNCEL sayfasına göre):
+- yanit_durumu ∈ {"Çözüldü","Çözülemedi"}
+- sentiment ∈ {"Pozitif","Negatif","Nötr"}
+- tur ∈ {"Şikayet","Sorun","Bilgi alma","İstek","Soru","İade"}
+- intent ∈ {sohbetler_GUNCEL sayfasında tanımlı değerler}
+- intent_detay ∈ {sohbetler_GUNCEL sayfasında tanımlı değerler}
+
+KARAR SIRASI (ANLAM BAZLI):
+1) intent (Müşterinin asıl amacı)
+2) intent_detay (Daha spesifik hedef veya durum)
+3) tur (iletişim tarzı: bilgi alma / sorun / şikayet vb.)
+4) yanit_durumu (çözüm sağlandı mı?)
+5) sentiment (duygusal ton)
+
+KÖK AMAÇ KURALI:
+- Tek bir ana amaç seç (intent).
+- Bağlamda birden fazla konu geçebilir → AMA müşteri aslında hangi işi çözdürmek istiyorsa onu seç.
+- Örnek: "Ürünüm eksik geldi, iade kodu da çalışmıyor" → asıl amaç **İade**.
+- "Kargom hala gelmedi, iptal etmek istiyorum" → asıl amaç **İptal**, kargo sadece bağlam.
+- "Kupon kodum çalışmadı" → asıl amaç **Kupon**, başka sorun olsa bile niyet bu.
+
+---
+### **TÜR (tur) - Anlam Bazlı Karar Kuralları**
+
+- **Şikayet**: Açık ve belirgin memnuniyetsizlik, kızgınlık, sitem veya olumsuzluk ifadeleri. 
+  Müşteri, bir sorun yaşadığını belirterek, durumdan duyduğu rahatsızlığı vurgular.
+  * **Örnek**: "Ürün defolu geldi, bir daha asla alışveriş yapmam, rezalet."
+  * **Örnek**: "Kargo şirketi çok kötü, sürekli sorun yaşıyorum."
+  * **Örnek**: "İade süreci inanılmaz uzun, bu ne hız?"
+
+- **Sorun**: Bir aksama var ama ifade daha sakin, çözüm odaklı. Müşteri "yardım" bekler bir tonda konuşur.
+  * **Kural**: Müşteri bir durumu bildiriyor ve çözüm arıyorsa `Sorun` seç. 
+  * **Örnek**: "Kargom hâlâ ulaşmadı, ne zaman gelir acaba?" 
+  * **Örnek**: "Siparişimde bir ürün eksik geldi, ne yapmalıyım?" 
+  * **Örnek**: "İade tutarı hâlâ hesabıma yatmadı." 
+
+- **Bilgi alma**: Müşteri sadece süreç veya kural öğrenmek istiyor, şikâyet ya da sorun vurgusu yok.
+  * **Örnek**: "İade süreci nasıl işliyor?"
+  * **Örnek**: "Kupon kodunu nasıl kullanabilirim?"
+
+- **İstek**: Müşteri doğrudan bir işlem yapılmasını talep ediyor. Genellikle emir kipi kullanılır.
+  * **Örnek**: "Siparişimi iptal edin."
+  * **Örnek**: "Adresimi güncelleyin."
+
+- **Soru**: Nötr bir sorgu, genellikle durum/seyir bilgisi. Tek bir soruyla sınırlı, olumsuz bir ton yoktur.
+  * **Kural**: Eğer bir aksaklık belirtisi varsa, bu `Soru` değil, `Sorun`dur.
+  * **Örnek**: "Kargom nerede?"
+  * **Örnek**: "Siparişim hazırlanıyor mu?"
+
+- **İade**: Konu doğrudan **iade süreci** üzerine kuruluysa, bu kategori seçilir.
+  * **Örnek**: "Aldığım ürünü iade etmek istiyorum."
+  * **Örnek**: "İade tutarı hâlâ hesabıma yatmadı." 
+
+# ===============================================================
+# 2. GELİŞMİŞ PROMPT ŞABLONU (KATMANLI VERSİYON)
+# ===============================================================
+
+ANLAM ÖNCELİKLİ — KATMANLI SINIFLANDIRMA (final)
+
+ROLÜN
+- E-ticaret müşteri sohbetlerini kelime ezberi yapmadan, tamamen BAĞLAM ve NİYET'e göre sınıflandır.
+- İç muhakemeni yazma; SADECE tek satır SAF JSON üret.
+
+TEK ÇIKIŞ (KAPALI KÜME, SIRALI ANAHTARLAR)
+{"yanit_durumu":"…","sentiment":"…","tur":"…","intent":"…","intent_detay":"…"}
+
+ALAN SÖZLÜKLERİ
+- yanit_durumu ∈ {"Çözüldü","Çözülemedi"}
+- sentiment ∈ {"Pozitif","Negatif","Nötr"}
+- tur ∈ {"Şikayet","Sorun","Bilgi alma","İstek","Soru","İade"}
+- intent ∈ {"Eksik ürün","Şifre sıfırlama","İade","Kupon","İptal","Stok","Ödeme","Kargo",
+            "Hasarlı ürün","Değişim","Ürün","İndirim","Hesap bilgisi","Hesap kapatma",
+            "Abonelik","Web sitesi","Yorum","Teknik sorun","Sipariş","Beden","Adres hatası"}
+- intent_detay ∈ {"Sipariş teslimatında eksik ürün","E-posta linki gelmemesi","İade prosedürü hakkında bilgi",
+                  "Kupon kodunun çalışmaması","Sipariş iptali","İade kargosu takibi","Değişim/iade yapılamaması",
+                  "Üyelik bilgisi güncelleme","Fatura fiyatı hatası","Sipariş iptali yapılamaması",
+                  "Stok yenileme tarihi","Çifte çekim","Kargo durumu","Kredi kartı reddedilmesi",
+                  "Ürün beden tablosu","Yanlış teslimat adresi","Yorum yayınlanmaması","Teknik hata",
+                  "Hesaptan para çekilip siparişin oluşmaması","Ürün bilgisi","Eksik promosyon ürünleri",
+                  "Para iadesi gecikmesi","Kargodan kaynaklı hasar","Değişim seçeneği olmaması",
+                  "Kampanya bilgisi","Yanlış ürün gönderimi","Hesap kapatma",
+                  "Stokta gör��nen ürünün eksik gelmesi","İade kodunun geçersiz olması",
+                  "Yanlış teslimat adresi","Sipariş durumu","Ödemenin tamamlanmaması",
+                  "Beden uyuşmazlığı","Kargonun gecikmesi","Garanti kapsamında tamir",
+                  "E-posta aboneliği iptali","Kargo gecikmesi","İade süreci gecikmesi"}
+
+KARAR SIRASI (KATLAMALI)
+1) intent (KÖK AMAÇ) → 2) intent_detay → 3) tur → 4) yanit_durumu → 5) sentiment
+
+KÖK AMAÇ KURALI (ANTI-"İADE MIKNATISI")
+- Tek kök amaç seç: Müşteri aslen hangi işi çözdürmek istiyor?
+- "Kargo/Sipariş" intentini YALNIZCA kargonun nerede/ne zaman/akış bilgisi asıl hedefse seç.
+- Aşağıdaki ÖZEL AMAÇLAR "Kargo/Sipariş"ten ÜSTÜNDÜR: İade, İptal, Adres hatası, Şifre sıfırlama,
+  Beden, Ödeme, Eksik ürün, Hasarlı ürün, Kupon.
+- "İade" intenti için DİREKT ipucu ZORUNLU: "iade", "para iadesi/refund/return", "iade kodu/etiketi",
+  "geri göndermek". Bu ipuçları yoksa ve başka özel amaç baskınsa "İade" SEÇME.
+
+# ===============================================================
+# 3. LLM KONFİGÜRASYONU VE API AYARLARI
+# ===============================================================
+
+## DESTEKLENEN MODELLER:
+1. **Command-R (Ollama - Lokal)**
+   - Model: command-r
+   - API: Ollama REST API
+   - Endpoint: http://localhost:11434/api/generate
+   - Avantaj: Lokal çözüm, maliyet yok
+   - Performans: %85+ ortalama doğruluk
+
+2. **GPT-4 (OpenAI)**
+   - Model: gpt-4o-mini veya gpt-4
+   - API: OpenAI REST API
+   - Gereksinim: OPENAI_API_KEY environment variable
+   - Avantaj: Yüksek doğruluk
+   - Dezavantaj: API maliyeti
+
+3. **Groq Modelleri**
+   - Modeller: llama3-70b, mixtral-8x7b, gemma-7b
+   - API: Groq REST API
+   - Gereksinim: GROQ_API_KEY environment variable
+   - Avantaj: Hızlı yanıt süreleri
+
+## API KONFİGÜRASYON PARAMETRELERİ:
+```python
+# Ollama Konfigürasyonu
+OLLAMA_CONFIG = {
+    "model": "command-r",
+    "temperature": 0.1,
+    "max_tokens": 150,
+    "stream": False,
+    "format": "json"
+}
+
+# OpenAI Konfigürasyonu
+OPENAI_CONFIG = {
+    "model": "gpt-4o-mini",
+    "temperature": 0.1,
+    "max_tokens": 150,
+    "response_format": {"type": "json_object"}
+}
+
+# Groq Konfigürasyonu
+GROQ_CONFIG = {
+    "model": "llama3-70b-8192",
+    "temperature": 0.1,
+    "max_tokens": 150
+}
+```
+
+## PYDANTIC ŞEMA VALİDASYONU:
+```python
+from pydantic import BaseModel, field_validator
+from typing import Literal
+
+class ConversationLabel(BaseModel):
+    yanit_durumu: Literal["Çözüldü", "Çözülemedi"]
+    sentiment: Literal["Pozitif", "Negatif", "Nötr"] 
+    tur: Literal["Şikayet", "Sorun", "Bilgi alma", "İstek", "Soru", "İade"]
+    intent: str  # Dinamik sözlük
+    intent_detay: str  # Dinamik sözlük
+    
+    @field_validator('intent')
+    @classmethod
+    def validate_intent(cls, v):
+        allowed_intents = ["Eksik ürün", "Şifre sıfırlama", "İade", "Kupon", "İptal", 
+                          "Stok", "Ödeme", "Kargo", "Hasarlı ürün", "Değişim", 
+                          "Ürün", "İndirim", "Hesap bilgisi", "Hesap kapatma",
+                          "Abonelik", "Web sitesi", "Yorum", "Teknik sorun", 
+                          "Sipariş", "Beden", "Adres hatası"]
+        if v not in allowed_intents:
+            raise ValueError(f"Intent değeri geçersiz: {v}")
+        return v
+```
+
+# ===============================================================
+# 4. KATEGORİ TANIMLARI VE SÖZLÜKLER
+# ===============================================================
+
+## YANIT DURUMU (yanit_durumu)
+- **Çözüldü**: Müşterinin sorunu tamamen çözüldü, işlem tamamlandı
+  - İptal edildi, iade kodu verildi, adres güncellendi
+  - Müşteri "teşekkür ederim", "halloldu", "tamam" gibi onay verdi
+  
+- **Çözülemedi**: Sorun devam ediyor, müşteri memnun değil
+  - "Tekrar deneyiniz", "iletildi", "şartlara uygun değil"
+  - Müşteri hala şikayetçi veya tatmin olmamış
+
+## SENTIMENT (Duygusal Ton)
+- **Pozitif**: Net memnuniyet, teşekkür, övgü
+  - "Mükemmel hizmet", "çok teşekkürler", "harika oldu"
+  
+- **Negatif**: Kızgınlık, hayal kırıklığı, eleştiri
+  - "Çok kötü", "rezalet", "bir daha alışveriş yapmam"
+  
+- **Nötr**: Sadece bilgi alışverişi, duygusal ton yok
+  - "Anladım", "peki", "teşekkür ederim" (rutin)
+
+## TUR (İletişim Tarzı)
+Detaylı tanımlar yukarıda "TÜR (tur) - Anlam Bazlı Karar Kuralları" bölümünde verilmiştir.
+
+## INTENT (Ana Amaç Kategorileri)
+### E-ticaret Spesifik İntentler:
+1. **Eksik ürün**: Siparişteki ürün/hediye eksik geldi
+2. **Hasarlı ürün**: Kırık, ezik, defolu ürün
+3. **İade**: Ürün geri gönderme, para iadesi
+4. **İptal**: Sipariş iptali
+5. **Kargo**: Kargo durumu, gecikme, takip
+6. **Ödeme**: Para çekme, iade, kredi kartı sorunları
+7. **Kupon**: İndirim kodu, kupon sorunu
+8. **Beden**: Beden uyuşmazlığı, beden tablosu
+9. **Değişim**: Ürün değiştirme talebi
+
+### Hesap ve Sistem İntentler:
+10. **Şifre sıfırlama**: Giriş sorunu, şifre yenileme
+11. **Hesap bilgisi**: Profil güncelleme, bilgi değişimi
+12. **Hesap kapatma**: Üyelik silme
+13. **Adres hatası**: Yanlış teslimat adresi
+14. **Teknik sorun**: Web sitesi, uygulama hatası
+
+### Bilgi ve Hizmet İntentler:
+15. **Stok**: Ürün stok durumu
+16. **Ürün**: Ürün bilgisi, özellikler
+17. **İndirim**: Kampanya bilgileri
+18. **Sipariş**: Sipariş durumu, süreç bilgisi
+19. **Yorum**: Yorum sorunu, değerlendirme
+20. **Abonelik**: E-posta aboneliği, bülten
+21. **Web sitesi**: Site kullanımı, navigasyon
+
+# ===============================================================
+# 5. KARAR KURALLARI VE ÖNCELİKLER
+# ===============================================================
+
+## ÖNCELİK SIRASI (Intent Belirleme)
+1. **Direkt İpucu Anahtar Kelimeler**: 
+   - "iade" → İade
+   - "iptal" → İptal  
+   - "kupon" → Kupon
+   - "beden" → Beden
+   - "şifre" → Şifre sıfırlama
+
+2. **Bağlamsal Analiz**:
+   - Müşterinin asıl çözmek istediği problem
+   - Yan konular ana amacı gölgelemez
+
+3. **Çoklu Konu Durumları**:
+   - "Ürünüm eksik geldi ve iade etmek istiyorum" → İade (öncelik)
+   - "Kargom gecikti, iptal edeyim" → İptal (amaç)
+
+## KAÇINMA KURALLARI
+- **İade Mıknatısı**: Her şeyi "İade" olarak etiketleme
+- **Kargo Yanılgısı**: Asıl amaç başka olsa da "Kargo" seçme
+- **Anahtar Kelime Ezberi**: Sadece kelimeye değil, anlama odaklan
+
+## VALİDASYON KURALLARI
+1. **JSON Format Kontrolü**: Çıktı geçerli JSON olmalı
+2. **Sözlük Kontrolü**: Tüm değerler tanımlı sözlüklerden seçilmeli
+3. **Tutarlılık Kontrolü**: Kategoriler birbirleriyle mantıklı olmalı
+
+# ===============================================================
+# 6. ÖRNEK KULLANIM SENARYOLARI
+# ===============================================================
+
+## Senaryo 1: Eksik Ürün Şikayeti
+**Sohbet**: "Siparişimde bir ürün eksik geldi, çok sinir bozucu bir durum!"
+**Beklenen Çıktı**: 
+```json
+{"yanit_durumu":"Çözülemedi","sentiment":"Negatif","tur":"Şikayet","intent":"Eksik ürün","intent_detay":"Sipariş teslimatında eksik ürün"}
+```
+
+## Senaryo 2: İade Talebi
+**Sohbet**: "Aldığım ürünü beğenmedim, iade etmek istiyorum."
+**Beklenen Çıktı**:
+```json
+{"yanit_durumu":"Çözülemedi","sentiment":"Nötr","tur":"İstek","intent":"İade","intent_detay":"İade prosedürü hakkında bilgi"}
+```
+
+## Senaryo 3: Kargo Durumu Sorgusu
+**Sohbet**: "Kargom nerede, ne zaman gelecek?"
+**Beklenen Çıktı**:
+```json
+{"yanit_durumu":"Çözülemedi","sentiment":"Nötr","tur":"Soru","intent":"Kargo","intent_detay":"Kargo durumu"}
+```
+
+## Senaryo 4: Çözülmüş Kupon Sorunu
+**Sohbet**: 
+"Müşteri: Kupon kodum çalışmıyor
+Bot: Kontrol ettim, kodunuzu manuel olarak uyguladım. İndiriminiz sepetinizde görünüyor.
+Müşteri: Harika, teşekkür ederim!"
+**Beklenen Çıktı**:
+```json
+{"yanit_durumu":"Çözüldü","sentiment":"Pozitif","tur":"Sorun","intent":"Kupon","intent_detay":"Kupon kodunun çalışmaması"}
+```
+
+# ===============================================================
+# 7. DOĞRULUK DEĞERLENDİRME KRİTERLERİ
+# ===============================================================
+
+## PERFORMANS METRİKLERİ (GÜNCEL SONUÇLAR)
+- **Yanıt Durumu**: %95.0 doğruluk
+- **Intent**: %82.5 doğruluk  
+- **Tur (Problem/Sorgu)**: %85.0 doğruluk
+- **Intent Detay**: %72.5 doğruluk
+- **Sentiment**: %92.5 doğruluk
+
+## DEĞERLENDİRME YÖNTEMİ
+1. **Manuel Etiketleme**: Uzman etiketleyiciler tarafından ground truth oluşturma
+2. **LLM Tahmini**: Model tahminleri üretme
+3. **Karşılaştırma**: Kategori bazında accuracy hesaplama
+4. **Hata Analizi**: Yanlış tahminlerin kök nedeni analizi
+
+## İYİLEŞTİRME ÖNCELİKLERİ
+1. **Intent Detay** kategorisinde performans artırımı (%72.5 → %85+)
+2. Çoklu intent senaryolarında karar verme
+3. Edge case'lerin daha iyi yönetimi
+4. Prompt engineering optimizasyonu
+
+## MODEL KARŞILAŞTIRMA SONUÇLARI (TUR KATEGORİSİ)
+- **Command-R**: %47.5 doğruluk
+- **LLaMA3:70B**: %52.5 doğruluk
+- **Mixtral**: %47.5 doğruluk  
+- **WizardLM2**: %25.0 doğruluk
+
+# ===============================================================
+# 8. TEKNİK UYGULAMA DETAYLARİ
+# ===============================================================
+
+## PYTHON KODU ÖRNEĞİ (LLM İnferans)
+```python
+import ollama
+import json
+from pydantic import BaseModel
+
+def classify_conversation(dialog_text, model="command-r"):
+    prompt = f"""
+    {PROMPT_TEMPLATE}
+    
+    SOHBET (kronolojik metin):
+    {dialog_text}
+    """
+    
+    response = ollama.generate(
+        model=model,
+        prompt=prompt,
+        format="json",
+        options={
+            "temperature": 0.1,
+            "top_p": 0.9
+        }
+    )
+    
+    try:
+        result = json.loads(response['response'])
+        # Pydantic ile validasyon
+        validated = ConversationLabel(**result)
+        return validated.dict()
+    except Exception as e:
+        return {"error": str(e)}
+
+# Kullanım
+dialog = "Müşteri: Siparişimde bir ürün eksik geldi..."
+result = classify_conversation(dialog)
+print(result)
+```
+
+## VERİ İŞLEME PİPELİNE
+1. **Veri Okuma**: JSON/CSV/XLSX formatlarında sohbet verileri
+2. **Ön İşleme**: Metin temizleme, karakter encoding düzeltme
+3. **LLM İnferans**: Batch processing ile etiketleme
+4. **Validasyon**: Pydantic şema kontrolü
+5. **Post-processing**: Sonuç analizi ve raporlama
+
+## HATA YÖNETİMİ
+- **API Hataları**: Retry logic ile tekrar deneme
+- **Format Hataları**: Fallback JSON parsing
+- **Validasyon Hataları**: Detaylı log kaydetme
+- **Rate Limiting**: API çağrı sıklığı kontrolü
+
+# ===============================================================
+# SON NOTLAR
+# ===============================================================
+
+Bu prompt koleksiyonu, Mila AI projesi kapsamında %85+ ortalama doğruluk 
+oranı elde eden yapılandırmalardır. Gerçek üretim ortamında kullanılırken:
+
+1. **Veri Güvenliği**: Müşteri verilerinin gizliliğini koruyun
+2. **Model Güncelleme**: Yeni verilerle düzenli fine-tuning yapın  
+3. **Performans İzleme**: Sürekli doğruluk metriklerini takip edin
+4. **İnsan Kontrolü**: Kritik durumlarda manuel inceleme ekleyin
+
+Son güncellenme: Ekim 2025
+Versiyon: 2.0
+Durum: Üretim hazır

@@ -1,0 +1,440 @@
+# ===============================================================
+# MILA AI PROJECT - EK TEKNİK DETAYLAR VE KULLANIM ÖRNEKLERİ
+# ===============================================================
+
+# Bu dosya, prompt_koleksiyonu_guncel.txt dosyasını tamamlayıcı 
+# niteliktedir ve pratik kullanım örnekleri içerir.
+
+# ===============================================================
+# EVAL PIPELINE KULLANIMI
+# ===============================================================
+
+## Komut Satırı Kullanımı
+```bash
+# Temel değerlendirme pipeline'ı
+python src/eval_pipeline.py \
+    --in-json data/raw/20-sohbet-trendyol-mila.json \
+    --prompt src/prompt_template.txt \
+    --pred-out outputs/predictions/preds_mila.csv \
+    --excel-out outputs/eval/mila_eval.xlsx \
+    --cm-dir outputs/eval/confusions \
+    --model command-r
+
+# LLM çıkarım (sadece tahmin)
+python src/llm_infer.py \
+    --in-xlsx data/processed/ground_truth.xlsx \
+    --prompt src/prompt_template.txt \
+    --out-csv outputs/llm_predictions.csv \
+    --model gpt-4o-mini
+```
+
+## Python Script İçinden Kullanım
+```python
+from src.data_load import load_conversations
+from src.llm_infer import predict_conversations
+from src.metrics_eval import write_excel_report
+
+# 1. Veri yükleme
+conversations = load_conversations("data/raw/20-sohbet-trendyol-mila.json")
+
+# 2. LLM tahmin
+predict_conversations(
+    conversations=conversations,
+    prompt_file="src/prompt_template.txt",
+    out_csv="outputs/preds.csv",
+    model="command-r"
+)
+
+# 3. Değerlendirme raporu
+write_excel_report(
+    gold_csv="data/ground_truth.csv",
+    pred_csv="outputs/preds.csv", 
+    out_xlsx="outputs/report.xlsx"
+)
+```
+
+# ===============================================================
+# MODEL KONFIGÜRASYONU ÖRNEKLERİ
+# ===============================================================
+
+## Ollama (Command-R) Konfigürasyonu
+```json
+{
+  "model": "command-r",
+  "prompt": "<<PROMPT_TEXT>>",
+  "format": "json",
+  "stream": false,
+  "options": {
+    "temperature": 0.1,
+    "top_p": 0.9,
+    "top_k": 40,
+    "repeat_penalty": 1.1,
+    "num_ctx": 2048
+  }
+}
+```
+
+## OpenAI API Konfigürasyonu
+```python
+import openai
+
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": conversation_text}
+    ],
+    temperature=0.1,
+    max_tokens=150,
+    response_format={"type": "json_object"}
+)
+```
+
+## Groq API Konfigürasyonu  
+```python
+from groq import Groq
+
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+completion = client.chat.completions.create(
+    model="llama3-70b-8192",
+    messages=[
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": conversation_text}
+    ],
+    temperature=0.1,
+    max_tokens=150
+)
+```
+
+# ===============================================================
+# VERİ FORMATLARI VE DÖNÜŞTÜRME
+# ===============================================================
+
+## JSON Input Formatı (20-sohbet-trendyol-mila.json)
+```json
+{
+  "conversations": [
+    {
+      "sohbet_id": "90001",
+      "tarih_saat": "2024-09-04 09:00:00",
+      "mesaj_sayisi": 7,
+      "tam_sohbet": "Bot: Merhaba!...\nMüşteri: ...",
+      "ground_truth": {
+        "yanit_durumu": "Çözüldü",
+        "sentiment": "Pozitif", 
+        "tur": "Sorun",
+        "intent": "Eksik ürün",
+        "intent_detay": "Sipariş teslimatında eksik ürün"
+      }
+    }
+  ]
+}
+```
+
+## CSV Output Formatı (llm_predictions.csv)
+```csv
+sohbet_id,yanit_durumu,sentiment,tur,intent,intent_detay,confidence
+90001,Çözüldü,Pozitif,Sorun,Eksik ürün,Sipariş teslimatında eksik ürün,0.92
+90002,Çözülemedi,Negatif,Şikayet,Kargo,Kargo gecikmesi,0.87
+```
+
+## Excel Rapor Formatı
+- **Sheet 1**: Karşılaştırmalı Analiz (Ground Truth vs Predictions)
+- **Sheet 2**: Kategori Bazlı Doğruluk Oranları
+- **Sheet 3**: Hata Analizi ve Detay
+- **Sheet 4**: Confusion Matrix
+
+# ===============================================================
+# HATA ANALİZİ VE SORUN GİDERME
+# ===============================================================
+
+## Sık Karşılaşılan Hatalar
+
+### 1. JSON Parse Hatası
+```python
+# Hatalı çıktı örneği
+"{'yanit_durumu': 'Çözüldü'}"  # Tek tırnak
+
+# Doğru format
+{"yanit_durumu": "Çözüldü"}   # Çift tırnak
+```
+
+**Çözüm**: Fallback parsing logic kullanın
+```python
+try:
+    result = json.loads(response)
+except:
+    # Tek tırnakları çift tırnak yap
+    result = json.loads(response.replace("'", '"'))
+```
+
+### 2. Kategori Validasyon Hatası
+```
+ValueError: Intent değeri geçersiz: Kargo Takip
+```
+
+**Çözüm**: Intent mapping tablosu kullanın
+```python
+INTENT_MAPPING = {
+    "Kargo Takip": "Kargo",
+    "Kargo Durumu": "Kargo", 
+    "Para İadesi": "İade"
+}
+```
+
+### 3. API Rate Limiting
+```
+groq.RateLimitError: Rate limit exceeded
+```
+
+**Çözüm**: Retry logic ve delay ekleyin
+```python
+import time
+from tenacity import retry, wait_exponential
+
+@retry(wait=wait_exponential(multiplier=1, min=4, max=10))
+def api_call_with_retry(prompt):
+    return client.generate(prompt)
+```
+
+### 4. Encoding Sorunları
+```
+UnicodeDecodeError: 'charmap' codec can't decode
+```
+
+**Çözüm**: UTF-8 encoding belirtin
+```python
+with open(file_path, 'r', encoding='utf-8') as f:
+    content = f.read()
+```
+
+# ===============================================================
+# PERFORMANS OPTİMİZASYONU
+# ===============================================================
+
+## Batch Processing
+```python
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+async def process_batch(conversations_batch):
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        tasks = [
+            executor.submit(classify_conversation, conv) 
+            for conv in conversations_batch
+        ]
+        results = [task.result() for task in tasks]
+    return results
+
+# Kullanım
+batch_size = 10
+for i in range(0, len(conversations), batch_size):
+    batch = conversations[i:i+batch_size]
+    results = await process_batch(batch)
+```
+
+## Cache Kullanımı
+```python
+from functools import lru_cache
+import hashlib
+
+@lru_cache(maxsize=1000)
+def cached_classify(conversation_hash):
+    return classify_conversation(conversation_text)
+
+def get_conversation_hash(text):
+    return hashlib.md5(text.encode()).hexdigest()
+```
+
+## Memory Management
+```python
+import gc
+import psutil
+
+def monitor_memory():
+    process = psutil.Process()
+    memory_mb = process.memory_info().rss / 1024 / 1024
+    print(f"Memory usage: {memory_mb:.1f} MB")
+    
+    if memory_mb > 1000:  # 1GB üzerindeyse
+        gc.collect()  # Garbage collection
+```
+
+# ===============================================================
+# MONİTÖRLEME VE LOGGING
+# ===============================================================
+
+## Detaylı Log Konfigürasyonu
+```python
+import logging
+from datetime import datetime
+
+# Log formatı
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(f'logs/mila_ai_{datetime.now().strftime("%Y%m%d")}.log'),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+# Kullanım
+logger.info(f"Processing conversation {sohbet_id}")
+logger.warning(f"Low confidence prediction: {confidence:.2f}")
+logger.error(f"Failed to parse response: {response_text}")
+```
+
+## Metrik Toplama
+```python
+from collections import defaultdict
+import time
+
+class PerformanceTracker:
+    def __init__(self):
+        self.metrics = defaultdict(list)
+        
+    def track_prediction(self, sohbet_id, duration, confidence):
+        self.metrics['durations'].append(duration)
+        self.metrics['confidences'].append(confidence)
+        
+    def get_stats(self):
+        return {
+            'avg_duration': np.mean(self.metrics['durations']),
+            'avg_confidence': np.mean(self.metrics['confidences']),
+            'total_predictions': len(self.metrics['durations'])
+        }
+
+# Kullanım
+tracker = PerformanceTracker()
+
+start_time = time.time()
+result = classify_conversation(conversation)
+duration = time.time() - start_time
+
+tracker.track_prediction(sohbet_id, duration, result.get('confidence', 0.5))
+```
+
+# ===============================================================
+# DEPLOYMENT VE PRODUCTION
+# ===============================================================
+
+## Docker Konfigürasyonu
+```dockerfile
+FROM python:3.10-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY src/ src/
+COPY data/ data/
+
+CMD ["python", "src/eval_pipeline.py", "--config", "config/production.yaml"]
+```
+
+## Environment Variables
+```bash
+# .env dosyası
+OPENAI_API_KEY=sk-proj-...
+GROQ_API_KEY=gsk_...
+OLLAMA_HOST=http://localhost:11434
+MODEL_NAME=command-r
+BATCH_SIZE=10
+MAX_RETRIES=3
+LOG_LEVEL=INFO
+```
+
+## Production Checklist
+- [ ] API key'leri güvenli şekilde saklama
+- [ ] Rate limiting implementasyonu
+- [ ] Error handling ve retry logic
+- [ ] Monitoring ve alerting
+- [ ] Input validation ve sanitization
+- [ ] Output format standardization
+- [ ] Performance benchmarking
+- [ ] Security scanning
+- [ ] Backup stratejisi
+- [ ] Documentation güncellemesi
+
+# ===============================================================
+# GELİŞTİRME VE TEST
+# ===============================================================
+
+## Unit Test Örnekleri
+```python
+import unittest
+from src.llm_infer import classify_conversation
+
+class TestClassification(unittest.TestCase):
+    
+    def test_simple_complaint(self):
+        conversation = "Müşteri: Ürünüm defolu geldi, çok kızgınım!"
+        result = classify_conversation(conversation)
+        
+        self.assertEqual(result['tur'], 'Şikayet')
+        self.assertEqual(result['sentiment'], 'Negatif')
+        self.assertIn(result['intent'], ['Hasarlı ürün', 'Eksik ürün'])
+    
+    def test_json_format(self):
+        conversation = "Müşteri: Kargom nerede?"
+        result = classify_conversation(conversation)
+        
+        required_keys = ['yanit_durumu', 'sentiment', 'tur', 'intent', 'intent_detay']
+        for key in required_keys:
+            self.assertIn(key, result)
+            
+if __name__ == '__main__':
+    unittest.main()
+```
+
+## Integration Test
+```python
+def test_full_pipeline():
+    # Test verisi hazırla
+    test_conversations = [
+        {"sohbet_id": "test_001", "tam_sohbet": "Test sohbeti..."}
+    ]
+    
+    # Pipeline çalıştır
+    predict_conversations(
+        conversations=test_conversations,
+        prompt_file="test_prompt.txt",
+        out_csv="test_output.csv"
+    )
+    
+    # Sonucu doğrula
+    results = pd.read_csv("test_output.csv")
+    assert len(results) == 1
+    assert results.iloc[0]['sohbet_id'] == "test_001"
+```
+
+# ===============================================================
+# VERSION HISTORY
+# ===============================================================
+
+## v2.0 (Ekim 2025) - CURRENT
+- Gelişmiş prompt engineering
+- Multi-model desteği (Ollama, OpenAI, Groq)
+- Pydantic validation
+- Kapsamlı hata yönetimi
+- Performance optimizasyonları
+
+## v1.5 (Eylül 2025)  
+- SWOT analizi entegrasyonu
+- Excel raporlama geliştirmeleri
+- Confusion matrix visualizations
+- Batch processing
+
+## v1.0 (Ağustos 2025)
+- İlk çalışan prototip
+- Temel classification pipeline
+- JSON input/output desteği
+- Command-R model entegrasyonu
+
+Son güncellenme: Ekim 2025

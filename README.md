@@ -131,6 +131,25 @@ Bu araç setini kullanarak aşağıdaki raporları ve analiz dosyalarını üret
 - `Trendyol Mila Sohbet Botu AI Analiz Ödevi.pptx` (Proje Sunumu)
   - *Not: Detaylı SWOT analizi ve geliştirme önerileri bu sunum dosyasının içinde yer almaktadır.*
 
+## 🆕 Yeni Eklenen Dosyalar
+
+### 📋 Dokümantasyon ve Kaynaklar
+- **`prompt_koleksiyonu_guncel.txt`** - Tüm güncel prompt şablonları ve LLM konfigürasyonları
+- **`teknik_detaylar_ve_kullanim.txt`** - Teknik implementasyon rehberi ve kullanım örnekleri
+- **`create_presentation.py`** - Otomatik PowerPoint sunum oluşturucu
+
+### 💻 Kaynak Kodlar (`src/` klasörü)
+- **`llm_infer.py`** - Ana LLM çıkarım motoru (Pydantic validasyonlu)
+- **`eval_pipeline.py`** - Uçtan uca değerlendirme pipeline'ı
+- **`data_load.py`** - Veri yükleme ve işleme fonksiyonları
+- **`metrics_eval.py`** - Performans metrik hesaplama ve raporlama
+- **`prompt_template.txt`** - Ana prompt şablonu (%85+ doğruluk)
+
+### 🔧 Yardımcı Araçlar
+- **`calculate_accuracy.py`** - Doğruluk hesaplama scriptleri
+- **`generate_reports.py`** - Görsel rapor oluşturucu
+- **`json_to_xlsx.py`** - Veri format dönüştürücü
+
 ---
 
 ## 🛡️ Lisans

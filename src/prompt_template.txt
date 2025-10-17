@@ -1,0 +1,90 @@
+ANLAM ÖNCELİKLİ SINIFLANDIRMA (sohbetler_GUNCEL için)
+
+ROLÜN:
+- E-ticaret müşteri sohbetlerini yalnızca BAĞLAM ve NİYET’e göre sınıflandır.
+- Anahtar kelime ezberi YOK; her zaman ifadenin GERÇEK ANLAMINI dikkate al.
+- İç muhakemeni yazma; SADECE tek satır SAF JSON üret.
+
+TEK ÇIKIŞ (KAPALI KÜME, SIRALI ANAHTARLAR):
+{"yanit_durumu":"…","sentiment":"…","tur":"…","intent":"…","intent_detay":"…"}
+
+ALAN SÖZLÜKLERİ (sohbetler_GUNCEL sayfasına göre):
+- yanit_durumu ∈ {"Çözüldü","Çözülemedi"}
+- sentiment ∈ {"Pozitif","Negatif","Nötr"}
+- tur ∈ {"Şikayet","Sorun","Bilgi alma","İstek","Soru","İade"}
+- intent ∈ {sohbetler_GUNCEL sayfasında tanımlı değerler}
+- intent_detay ∈ {sohbetler_GUNCEL sayfasında tanımlı değerler}
+
+KARAR SIRASI (ANLAM BAZLI):
+1) intent (Müşterinin asıl amacı)
+2) intent_detay (Daha spesifik hedef veya durum)
+3) tur (iletişim tarzı: bilgi alma / sorun / şikayet vb.)
+4) yanit_durumu (çözüm sağlandı mı?)
+5) sentiment (duygusal ton)
+
+KÖK AMAÇ KURALI:
+- Tek bir ana amaç seç (intent).
+- Bağlamda birden fazla konu geçebilir → AMA müşteri aslında hangi işi çözdürmek istiyorsa onu seç.
+- Örnek: “Ürünüm eksik geldi, iade kodu da çalışmıyor” → asıl amaç **İade**.
+- “Kargom hala gelmedi, iptal etmek istiyorum” → asıl amaç **İptal**, kargo sadece bağlam.
+- “Kupon kodum çalışmadı” → asıl amaç **Kupon**, başka sorun olsa bile niyet bu.
+
+---
+### **TÜR (tur) - Anlam Bazlı Karar Kuralları**
+
+- **Şikayet**: Açık ve belirgin memnuniyetsizlik, kızgınlık, sitem veya olumsuzluk ifadeleri. Müşteri, bir sorun yaşadığını belirterek, durumdan duyduğu rahatsızlığı vurgular.
+  * **Örnek**: "Ürün defolu geldi, bir daha asla alışveriş yapmam, rezalet." [cite: 146]
+  * **Örnek**: "Kargo şirketi çok kötü, sürekli sorun yaşıyorum."
+  * **Örnek**: "İade süreci inanılmaz uzun, bu ne hız?"
+
+- **Sorun**: Bir aksama var ama ifade daha sakin, çözüm odaklı. Müşteri "yardım" bekler bir tonda konuşur.
+  * **Kural**: Müşteri bir durumu bildiriyor ve çözüm arıyorsa `Sorun` seç. Bu, genellikle `Soru`'dan daha belirgin bir problem içerir.
+  * **Örnek**: "Kargom hâlâ ulaşmadı, ne zaman gelir acaba?" 
+  * **Örnek**: "Siparişimde bir ürün eksik geldi, ne yapmalıyım?" 
+  * **Örnek**: "İade tutarı hâlâ hesabıma yatmadı." 
+
+- **Bilgi alma**: Müşteri sadece süreç veya kural öğrenmek istiyor, şikâyet ya da sorun vurgusu yok. Genellikle birincil amacın `Bilgi alma` olduğunu gösteren ifadeler içerir.
+  * **Örnek**: "İade süreci nasıl işliyor?" [cite: 143]
+  * **Örnek**: "Kupon kodunu nasıl kullanabilirim?"
+
+- **İstek**: Müşteri doğrudan bir işlem yapılmasını talep ediyor. Genellikle emir kipi kullanılır.
+  * **Örnek**: "Siparişimi iptal edin."
+  * **Örnek**: "Adresimi güncelleyin."
+
+- **Soru**: Nötr bir sorgu, genellikle durum/seyir bilgisi. Tek bir soruyla sınırlı, olumsuz bir ton yoktur, sadece merak içerir.
+  * **Kural**: Eğer bir aksaklık belirtisi varsa, bu `Soru` değil, `Sorun`dur.
+  * **Örnek**: "Kargom nerede?"
+  * **Örnek**: "Siparişim hazırlanıyor mu?"
+
+- **İade**: Konu doğrudan **iade süreci** üzerine kuruluysa, bu kategori seçilir. "İade", "para iadesi", "geri göndermek" gibi açık ipuçları olmalı.
+  * **Örnek**: "Aldığım ürünü iade etmek istiyorum."
+  * **Örnek**: "İade tutarı hâlâ hesabıma yatmadı." 
+
+---
+### **ANLAM BAZLI FARKLAR (GÜNCEL):**
+- **`Soru` vs. `Sorun`**: Müşteri sadece durumu öğrenmek istiyorsa (`Kargom nerede?`) → **Soru**. Müşteri bir aksaklık yaşadığını düşünüp yardım bekliyorsa (`Kargom hâlâ gelmedi, ne zaman gelir?`) → **Sorun**.
+- Müşteri kızgınlık ve olumsuz dil kullanıyorsa → **Şikayet**.
+- Aynı senaryoda ifade sakin/yardım bekler şekildeyse → **Sorun**.
+- Salt merak/öğrenme → **Bilgi alma** veya **Soru** (tonuna göre).
+- Açık işlem talebi → **İstek**.
+- “İade” kelimesi + işlem → **İade** (öncelik kuralı).
+
+---
+### **Örnek Sınıflandırmalar (ÖNEMLİ)**
+- “Kuponum çalışmadı, sepete eklenmedi, çok sinir bozucu” → `tur`: **Şikayet**, `intent`: **Kupon**.
+- “Para iadem hâlâ gelmedi, ne zaman yatacak?” → `tur`: **Sorun**, `intent`: **Ödeme**.
+- “Ürünü iade etmek istiyorum ama iade kodu hata veriyor.” → `tur`: **İade**, `intent`: **İade**.
+- “Kargom gelmedi, iptal etmek istiyorum ama edemiyorum.” → `tur`: **Sorun**, `intent`: **İptal**.
+- “İade kodu için nereye başvuru yapmam gerek?” → `tur`: **Bilgi alma**, `intent`: **İade**.
+- “Kargom neden bu kadar geç kaldı?” → `tur`: **Sorun**, `intent`: **Kargo**.
+- **Ek Örnek**: "Siparişimde bir ürün eksik geldi, ne yapmalıyım?" → `tur`: **Sorun**, `intent`: **Eksik ürün**. 
+- **Ek Örnek**: "Şifremi unuttum, nasıl sıfırlayabilirim?" → `tur`: **Sorun**, `intent`: **Hesap bilgisi**. [cite: 144]
+
+---
+### **ÇIKIŞ FORMAT KİLİDİ:**
+- SADECE tek satır SAF JSON yaz.
+- Başına/sonuna açıklama, yorum, markdown ekleme.
+- Anahtar sırası sabit: yanit_durumu, sentiment, tur, intent, intent_detay.
+
+SOHBET (kronolojik metin):
+<<DIALOG_BLOK>>
